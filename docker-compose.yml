@@ -1,0 +1,18 @@
+services:
+    # db:
+    #     image: postgres:17-alpine3.21
+    #     restart: always
+    #     # set shared memory limit when using docker-compose
+    #     shm_size: 128mb
+    #     ports: [5433:5432]
+    #     environment:
+    #         POSTGRES_PASSWORD: bulat
+    #         POSTGRES_USER: bulat
+    #         POSTGRES_DB: pomodor
+    #     volumes:
+    #         - .data_db:/var/lib/postgresql/
+
+    cache:
+        image: redis:7.2.4-alpine
+        restart: always
+        ports: [6377:6379]
