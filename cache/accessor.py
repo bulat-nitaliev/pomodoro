@@ -1,9 +1,10 @@
 import redis
+from core import settings
 
 def get_connect()->redis.Redis:
     return redis.Redis(
-        host="localhost",
-        port=6379,
-        db=0,
+        host=settings.CACHE_HOST,
+        port=settings.CACHE_PORT,
+        db=settings.CACHE_DB,
     )
 

@@ -20,6 +20,6 @@ class DatabaseHelper:
             )
         return session
     
-db_helper  = DatabaseHelper(url=settings.db_url)
+db_helper  = DatabaseHelper(url=settings.get_db_url)
 
 
