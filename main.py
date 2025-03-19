@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from handlers import router as task_router
+from handlers import router
 
 
 app = FastAPI()
-app.include_router(task_router)
+app.include_router(router)
 
 

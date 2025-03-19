@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, Result, delete, update
-from core import db_helper, Tasks
+from core import get_db_session, Tasks
 from schema import TasksSchema
 from .task_cache import TaskCache
 
@@ -51,5 +51,5 @@ class TasksRepository:
         
 
 def get_task_repository():
-    db_session = db_helper.get_db_session()
+    db_session = get_db_session()
     return TasksRepository(db_session)

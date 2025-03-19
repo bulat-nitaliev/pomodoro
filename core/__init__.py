@@ -2,7 +2,7 @@ from .models.tasks import Category, Tasks
 from .models.user import UserProfile
 from .config import settings
 from .database import Base
-from .db_helper import db_helper
+from core.db_helper import  get_db_session
 
 __all__ = (
     "Category",
@@ -10,5 +10,5 @@ __all__ = (
     "UserProfile",
     "settings",
     "Base",
-    "db_helper"
+    "get_db_session"
 )

@@ -1,4 +1,4 @@
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
 from sqlalchemy import create_engine
 from core.config import settings
 
@@ -21,5 +21,9 @@ class DatabaseHelper:
         return session
     
 db_helper  = DatabaseHelper(url=settings.get_db_url)
+
+
+def get_db_session():
+    return Session(db_helper.engine)
 
 
