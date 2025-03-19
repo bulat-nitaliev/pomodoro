@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     DB_HOST:str = '0.0.0.0'
     DB_PORT:str = '5432'
     DB_USER:str = 'postgres'
-    DB_PASS:str = 'SA-testing-1'
+    DB_PASS:str = '1307'
     DB_NAME:str = "pomodor"
     CACHE_HOST:str = 'localhost'
     CACHE_PORT:int = 6379
