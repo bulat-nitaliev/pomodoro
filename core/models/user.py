@@ -7,4 +7,4 @@ from core.database import Base
 class UserProfile(Base):
     username: Mapped[str] = mapped_column(String(50))
     password: Mapped[str] = mapped_column(String(100))
-    access_token: Mapped[str] = mapped_column(String(100))
+    # access_token: Mapped[Optional[str]] = mapped_column(String(100))

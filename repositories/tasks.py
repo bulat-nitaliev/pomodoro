@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select, Result, delete, update
 from core import get_db_session, Tasks
-from schema import TasksSchema
+from schema import TasksSchema, TasksCreateSchema
 from .task_cache import TaskCache
 
 
@@ -11,30 +11,31 @@ class TasksRepository:
 
     def get_task(self,task_id:int):
         query = select(Tasks).where(Tasks.id == task_id)
-        with self.db_session() as session:
+        with self.db_session as session:
             res:Result  = session.execute(query).scalar()
             return res
         
     def get_tasks(self):
         query = select(Tasks).order_by(Tasks.id.desc())
-        with self.db_session() as session:
+        with self.db_session as session:
             res:Result  = session.execute(query).scalars().all()
             return list(res)
 
 
-    def add_task(self, task:TasksSchema, task_cache: TaskCache):
-        stmt = Tasks(**task.model_dump())
-        with self.db_session() as session:
+    def add_task(self, task:TasksCreateSchema, task_cache: TaskCache, user_id:int):
+        stmt = Tasks(**task.model_dump(), user_id=user_id)
+        with self.db_session as session:
             session.add(stmt)
             session.commit()
-        task_cache.drop_tasks()
-        return task
+            task_cache.drop_tasks()
+            return stmt.id
         
-    def update_task(self,task_id:int, task:TasksSchema,  task_cache: TaskCache):
+    def update_task(self,task_id:int, task:TasksCreateSchema,  task_cache: TaskCache):
+        print(task.model_dump())
         query = update(Tasks).where(Tasks.id == task_id).values(
             **task.model_dump()
             ).returning(Tasks.id)
-        with self.db_session() as session:
+        with self.db_session as session:
             id:int  = session.execute(query).scalar_one_or_none()
             session.commit()
             task_cache.drop_tasks()
@@ -42,12 +43,17 @@ class TasksRepository:
         
     def delete_task(self,task_id:int,  task_cache: TaskCache):
         query = delete(Tasks).where(Tasks.id == task_id)
-        with self.db_session() as session:
+        with self.db_session as session:
             session.execute(query)
             session.commit()
             task_cache.drop_tasks()
-            return {"message": f"task {task_id} deleted"}
             
+    
+    def get_user_task(self,task_id:int, user_id:int):
+        query = select(Tasks).where(Tasks.id==task_id, Tasks.user_id==user_id)
+        with self.db_session as session:
+            task = session.execute(query).one_or_none()
+            return task
         
 
 def get_task_repository():
