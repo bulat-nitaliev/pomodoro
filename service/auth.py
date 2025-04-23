@@ -5,7 +5,7 @@ from exception import UserNotFoundException, UserNotCorrectPasswordException, To
 from core import UserProfile, Settings
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
-from client import GoogleClient
+from client import GoogleClient, YandexClient
 
 
 
@@ -14,17 +14,21 @@ class AuthService:
     user_repository: UserRepository
     settings: Settings
     google_client: GoogleClient
+    yandex_client: YandexClient
 
     def login(self,username:str, password:str)->UserLoginSchema:
         user = self.user_repository.get_user_by_username(username)
         access_token = self.create_access_token(user_id=user.id)
         return UserLoginSchema(user_id=user.id, access_token=access_token)
     
-    def get_google_redirect_url(self):
+    def get_google_redirect_url(self)->str:
         return self.settings.get_url_redirect
     
 
-    def auth_google(self,code:str):
+    def get_yandex_redirect_url(self)->str:
+        return self.settings.get_yandex_url_redirect
+
+    def auth_google(self,code:str)->UserLoginSchema:
         user_info = self.google_client.get_user_info(code=code)
         print(user_info)
         user = self.user_repository.get_user_by_username(username=user_info['email'])
@@ -39,12 +43,33 @@ class AuthService:
             username=user_info['email'],
             password=user_info['name']
         )
-        access_token = self.create_access_token(user_id=user.id)
+        access_token = self.create_access_token(user_id=user_created.id)
         return UserLoginSchema(
             user_id=user_created.id, 
             access_token=access_token
             )
 
+
+    def auth_yandex(self, code:str)->UserLoginSchema:
+        user_info = self.yandex_client.get_user_info(code=code)
+        print(user_info)
+        user = self.user_repository.get_user_by_username(username=user_info['default_email'])
+        print(user)
+        if user:
+            access_token = self.create_access_token(user_id=user.id)
+            return UserLoginSchema(
+                user_id=user.id, 
+                access_token=access_token
+                )
+        user_created = self.user_repository.create_user(
+            username=user_info['default_email'],
+            password=user_info['login']
+        )
+        access_token = self.create_access_token(user_id=user_created.id)
+        return UserLoginSchema(
+            user_id=user_created.id, 
+            access_token=access_token
+            )
 
 
     
