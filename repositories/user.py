@@ -5,7 +5,6 @@ from core import db_helper, Tasks
 from schema import UserLoginSchema
 from dataclasses import dataclass
 
-
 @dataclass
 class UserRepository:
     db_session:Session

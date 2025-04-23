@@ -30,10 +30,17 @@ class TasksRepository:
             task_cache.drop_tasks()
             return stmt.id
         
-    def update_task(self,task_id:int, task:TasksCreateSchema,  task_cache: TaskCache):
-        print(task.model_dump())
+    def update_task(
+            self,
+            task_id:int, 
+            task:TasksCreateSchema,  
+            task_cache: TaskCache,
+            user_id:int
+            ):
+       
         query = update(Tasks).where(Tasks.id == task_id).values(
-            **task.model_dump()
+            **task.model_dump(),
+            user_id=user_id
             ).returning(Tasks.id)
         with self.db_session as session:
             id:int  = session.execute(query).scalar_one_or_none()

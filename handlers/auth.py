@@ -4,7 +4,9 @@ from schema import UserLoginSchema,UserCreateSchema
 from service import AuthService
 from dependecy import get_auth_service
 from exception import UserNotCorrectPasswordException, UserNotFoundException
-
+from dependecy import get_auth_service
+from exception import UserNotCorrectPasswordException, UserNotFoundException
+from fastapi.responses import RedirectResponse
 
 router = APIRouter(tags=["auth"], prefix='/auth')
 
@@ -25,3 +27,22 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=e.detail
         )
+    
+
+
+@router.get(
+        "/login/google",
+        response_class=RedirectResponse
+        )
+async def google_login(auth_service: Annotated[AuthService,Depends(get_auth_service)]) :
+    redirect_url:str =  auth_service.get_google_redirect_url()
+    print(redirect_url)
+    return RedirectResponse(url=redirect_url)
+
+
+@router.get('/google')
+async def auth_google(
+    auth_service: Annotated[AuthService,Depends(get_auth_service)],
+    code:str
+):
+    return auth_service.auth_google(code=code)

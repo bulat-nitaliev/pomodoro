@@ -5,6 +5,7 @@ from exception import UserNotFoundException, UserNotCorrectPasswordException, To
 from core import UserProfile, Settings
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
+from client import GoogleClient
 
 
 
@@ -12,11 +13,40 @@ from datetime import datetime, timedelta
 class AuthService:
     user_repository: UserRepository
     settings: Settings
+    google_client: GoogleClient
 
     def login(self,username:str, password:str)->UserLoginSchema:
         user = self.user_repository.get_user_by_username(username)
         access_token = self.create_access_token(user_id=user.id)
         return UserLoginSchema(user_id=user.id, access_token=access_token)
+    
+    def get_google_redirect_url(self):
+        return self.settings.get_url_redirect
+    
+
+    def auth_google(self,code:str):
+        user_info = self.google_client.get_user_info(code=code)
+        print(user_info)
+        user = self.user_repository.get_user_by_username(username=user_info['email'])
+        print(user)
+        if user:
+            access_token = self.create_access_token(user_id=user.id)
+            return UserLoginSchema(
+                user_id=user.id, 
+                access_token=access_token
+                )
+        user_created = self.user_repository.create_user(
+            username=user_info['email'],
+            password=user_info['name']
+        )
+        access_token = self.create_access_token(user_id=user.id)
+        return UserLoginSchema(
+            user_id=user_created.id, 
+            access_token=access_token
+            )
+
+
+
     
 
     @staticmethod

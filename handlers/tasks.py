@@ -30,16 +30,18 @@ def get_task(task_id:int):
     task_repo = get_task_repository()
     return task_repo.get_task(task_id=task_id)
 
+
 @router.put("/{task_id}", response_model=TasksSchema)
 def put_task(task_id:int,
-            task:TasksCreateSchema,
+            body:TasksCreateSchema,
             task_service: Annotated[TaskService, Depends(get_task_servise)],
             user_id:Annotated[int,Depends(get_request_user_id)]
              ):
     try:
+        print('put')
         return task_service.update_task(
             task_id=task_id, 
-            task=task, 
+            task=body, 
             user_id=user_id
             )
     except TaskNotFoundException as e:

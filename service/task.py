@@ -35,13 +35,14 @@ class TaskService:
             task:TasksCreateSchema, 
             user_id:int
             ):
-        task = self.task_repo.get_user_task(task_id=task_id, user_id=user_id)
-        if not task:
+        task_current = self.task_repo.get_user_task(task_id=task_id, user_id=user_id)
+        if not task_current:
             raise TaskNotFoundException
         task_update = self.task_repo.update_task(
             task_id=task_id,
             task=task, 
-            task_cache=self.task_cache
+            task_cache=self.task_cache,
+            user_id=user_id
             )
         return TasksSchema.model_validate(task_update)
     
