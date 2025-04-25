@@ -1,45 +1,52 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from schema import TasksSchema, TasksCreateSchema
-from repositories import get_task_repository, get_task_cache_repository, TaskCache, TasksRepository
 from typing import List, Annotated
-from service import get_task_servise, TaskService
-from dependecy import  get_request_user_id
+from service import  TaskService
+from dependecy import  get_request_user_id,get_task_servise
 from exception import TaskNotFoundException
 
 
 router = APIRouter(tags=["tasks"], prefix='/tasks')
 
 @router.post("", response_model=TasksSchema)
-def create_task(
+async def create_task(
     body:TasksCreateSchema, 
     task_service: Annotated[TaskService, Depends(get_task_servise)],
     user_id:Annotated[int,Depends(get_request_user_id)]
     ):
-    return task_service.create_task(body, user_id)
+    return await task_service.create_task(body=body, user_id=user_id)
 
 
 @router.get("", response_model=List[TasksSchema])
-def get_task(
+async def get_task(
     task_service:TaskService = Depends(get_task_servise),
     ):
-    return task_service.get_tasks()
+    return await task_service.get_tasks()
     
 
 @router.get("/{task_id}")
-def get_task(task_id:int):
-    task_repo = get_task_repository()
-    return task_repo.get_task(task_id=task_id)
+async def get_task(
+    task_id:int,
+    task_service:TaskService = Depends(get_task_servise)
+    ):
+    try:
+        return await task_service.get_task_by_id(task_id=task_id)
+    except TaskNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.detail
+        )
 
 
 @router.put("/{task_id}", response_model=TasksSchema)
-def put_task(task_id:int,
+async def put_task(task_id:int,
             body:TasksCreateSchema,
             task_service: Annotated[TaskService, Depends(get_task_servise)],
             user_id:Annotated[int,Depends(get_request_user_id)]
              ):
     try:
         print('put')
-        return task_service.update_task(
+        return await task_service.update_task(
             task_id=task_id, 
             task=body, 
             user_id=user_id
@@ -52,13 +59,13 @@ def put_task(task_id:int,
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def destroy_task(
+async def destroy_task(
     task_id:int,
     task_service: Annotated[TaskService, Depends(get_task_servise)],
     user_id:Annotated[int,Depends(get_request_user_id)]
     ):
     try:
-        task_service.delete_task(task_id=task_id, user_id=user_id)
+        await task_service.delete_task(task_id=task_id, user_id=user_id)
     except TaskNotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

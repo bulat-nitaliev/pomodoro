@@ -16,7 +16,7 @@ async def login(
     user_service: Annotated[AuthService,Depends(get_auth_service)]
     )->UserLoginSchema:
     try:
-        return user_service.login(body.username, body.password)
+        return await user_service.login(body.username, body.password)
     except UserNotFoundException as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

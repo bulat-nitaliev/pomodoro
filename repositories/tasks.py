@@ -1,36 +1,48 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Result, delete, update
-from core import get_db_session, Tasks
+from core import  Tasks
 from schema import TasksSchema, TasksCreateSchema
 from .task_cache import TaskCache
 
 
 class TasksRepository:
-    def __init__(self, db_session:Session):
+    def __init__(self, db_session:AsyncSession):
         self.db_session = db_session
 
-    def get_task(self,task_id:int):
+    async def get_task(self,task_id:int):
         query = select(Tasks).where(Tasks.id == task_id)
-        with self.db_session as session:
-            res:Result  = session.execute(query).scalar()
-            return res
+        async with self.db_session as session:
+            res:Result  = await session.execute(query)
+            return res.scalar()
         
-    def get_tasks(self):
+        # return await self.db_session.get(Tasks, task_id)
+        
+    async def get_tasks(self):
         query = select(Tasks).order_by(Tasks.id.desc())
-        with self.db_session as session:
-            res:Result  = session.execute(query).scalars().all()
+        async with self.db_session as session:
+            res:Result  = await session.execute(query)
+            res = res.scalars().all()
+            print(res)
             return list(res)
+        
+    
 
 
-    def add_task(self, task:TasksCreateSchema, task_cache: TaskCache, user_id:int):
+
+    async def add_task(self, task:TasksCreateSchema, task_cache: TaskCache, user_id:int):
         stmt = Tasks(**task.model_dump(), user_id=user_id)
-        with self.db_session as session:
-            session.add(stmt)
-            session.commit()
-            task_cache.drop_tasks()
+        print(task)
+        async with self.db_session as session:
+            
+            await session.add(stmt)
+            
+            await session.commit()
+            await session.flush()
+            print(stmt.id)
+            await task_cache.drop_tasks()
             return stmt.id
         
-    def update_task(
+    async def update_task(
             self,
             task_id:int, 
             task:TasksCreateSchema,  
@@ -42,27 +54,24 @@ class TasksRepository:
             **task.model_dump(),
             user_id=user_id
             ).returning(Tasks.id)
-        with self.db_session as session:
-            id:int  = session.execute(query).scalar_one_or_none()
-            session.commit()
-            task_cache.drop_tasks()
-            return self.get_task(id)
+        async with self.db_session as session:
+            id:int  = await  session.execute(query)
+            await session.commit()
+            await task_cache.drop_tasks()
+            return self.get_task(id.scalar_one_or_none())
         
-    def delete_task(self,task_id:int,  task_cache: TaskCache):
+    async def delete_task(self,task_id:int,  task_cache: TaskCache):
         query = delete(Tasks).where(Tasks.id == task_id)
-        with self.db_session as session:
-            session.execute(query)
-            session.commit()
-            task_cache.drop_tasks()
+        async with self.db_session as session:
+            await session.execute(query)
+            await session.commit()
+            await task_cache.drop_tasks()
             
     
-    def get_user_task(self,task_id:int, user_id:int):
+    async def get_user_task(self,task_id:int, user_id:int):
         query = select(Tasks).where(Tasks.id==task_id, Tasks.user_id==user_id)
         with self.db_session as session:
             task = session.execute(query).one_or_none()
             return task
         
 
-def get_task_repository():
-    db_session = get_db_session()
-    return TasksRepository(db_session)

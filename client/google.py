@@ -1,23 +1,25 @@
 from dataclasses import dataclass
 from core import Settings
-import requests
+import httpx
 
 
 @dataclass
 class GoogleClient:
     settings:Settings
+    async_client: httpx.AsyncClient
 
 
-    def get_user_info(self, code:str):
+    async def get_user_info(self, code:str):
         access_token = self._get_user_access_token(code=code)
-        user_info = requests.get(
-                "https://www.googleapis.com/oauth2/v3/userinfo", headers={"Authorization": f"Bearer {access_token}"}
-            )
+        async with self.async_client() as client:
+            user_info = await client.get(
+                    "https://www.googleapis.com/oauth2/v3/userinfo", headers={"Authorization": f"Bearer {access_token}"}
+                )
         
         return user_info.json()
 
 
-    def _get_user_access_token(self,code:str):
+    async def _get_user_access_token(self,code:str):
         data = {
             "code": code,
             "client_id": self.settings.CLIENT_ID,
@@ -25,6 +27,7 @@ class GoogleClient:
             "redirect_uri": self.settings.REDIRECT_URI,
             "grant_type": "authorization_code",
         }
-        
-        response = requests.post(url=self.settings.TOKEN_URL, data=data)
+        async with self.async_client() as client:
+            response = await client.post(url=self.settings.TOKEN_URL, data=data)
+            
         return response.json()["access_token"]
