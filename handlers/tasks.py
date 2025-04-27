@@ -21,7 +21,13 @@ async def create_task(
 async def get_task(
     task_service:TaskService = Depends(get_task_servise),
     ):
-    return await task_service.get_tasks()
+    try:
+        return await task_service.get_tasks()
+    except TaskNotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=e.detail
+        )
     
 
 @router.get("/{task_id}")
