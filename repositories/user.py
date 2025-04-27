@@ -19,13 +19,14 @@ class UserRepository:
         ).returning(UserProfile.id)
         async with self.db_session as session:
             user_id:int = await session.execute(query)
+            
             await session.commit()
             await session.flush()
             user = await self.get_user_by_id(user_id.scalar())
             return user
         
     async def get_user_by_id(self,user_id:int)->UserProfile:
-        query = await select(UserProfile).where(UserProfile.id == user_id)
+        query = select(UserProfile).where(UserProfile.id == user_id)
         async with self.db_session as session:
             return  (await session.execute(query)).scalar_one_or_none()
         

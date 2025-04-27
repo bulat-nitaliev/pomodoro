@@ -10,13 +10,15 @@ class TaskService:
     task_cache: TaskCache
 
     async def get_tasks(self):
+
         if task_cache_repo:= await self.task_cache.get_tasks():
             print(task_cache_repo)
         
             return task_cache_repo
         tasks = await self.task_repo.get_tasks()
         tasks_shema = [TasksSchema.model_validate(task) for task in tasks]
-        await self.task_cache.set_tasks(tasks_shema)
+        if tasks_shema:
+            await self.task_cache.set_tasks(tasks_shema)
         return tasks_shema
     
     async def get_task_by_id(self, task_id:int)->TasksSchema:
@@ -31,6 +33,7 @@ class TaskService:
             task_cache=self.task_cache, 
             user_id=user_id
             )
+        print(task_id)
         task = await self.task_repo.get_task(task_id=task_id)
         return TasksSchema.model_validate(task)
     
@@ -49,6 +52,7 @@ class TaskService:
             task_cache=self.task_cache,
             user_id=user_id
             )
+        print(task_update)
         return TasksSchema.model_validate(task_update)
     
     
