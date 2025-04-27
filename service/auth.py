@@ -16,22 +16,22 @@ class AuthService:
     google_client: GoogleClient
     yandex_client: YandexClient
 
-    def login(self,username:str, password:str)->UserLoginSchema:
-        user = self.user_repository.get_user_by_username(username)
+    async def login(self,username:str, password:str)->UserLoginSchema:
+        user = await self.user_repository.get_user_by_username(username)
         access_token = self.create_access_token(user_id=user.id)
         return UserLoginSchema(user_id=user.id, access_token=access_token)
     
-    def get_google_redirect_url(self)->str:
+    async def get_google_redirect_url(self)->str:
         return self.settings.get_url_redirect
     
 
-    def get_yandex_redirect_url(self)->str:
+    async def get_yandex_redirect_url(self)->str:
         return self.settings.get_yandex_url_redirect
 
-    def auth_google(self,code:str)->UserLoginSchema:
-        user_info = self.google_client.get_user_info(code=code)
+    async def auth_google(self,code:str)->UserLoginSchema:
+        user_info = await  self.google_client.get_user_info(code=code)
         print(user_info)
-        user = self.user_repository.get_user_by_username(username=user_info['email'])
+        user = await self.user_repository.get_user_by_username(username=user_info['email'])
         print(user)
         if user:
             access_token = self.create_access_token(user_id=user.id)
@@ -39,7 +39,7 @@ class AuthService:
                 user_id=user.id, 
                 access_token=access_token
                 )
-        user_created = self.user_repository.create_user(
+        user_created = await self.user_repository.create_user(
             username=user_info['email'],
             password=user_info['name']
         )
@@ -50,10 +50,10 @@ class AuthService:
             )
 
 
-    def auth_yandex(self, code:str)->UserLoginSchema:
-        user_info = self.yandex_client.get_user_info(code=code)
+    async def auth_yandex(self, code:str)->UserLoginSchema:
+        user_info = await self.yandex_client.get_user_info(code=code)
         print(user_info)
-        user = self.user_repository.get_user_by_username(username=user_info['default_email'])
+        user = await self.user_repository.get_user_by_username(username=user_info['default_email'])
         print(user)
         if user:
             access_token = self.create_access_token(user_id=user.id)
@@ -61,7 +61,7 @@ class AuthService:
                 user_id=user.id, 
                 access_token=access_token
                 )
-        user_created = self.user_repository.create_user(
+        user_created = await self.user_repository.create_user(
             username=user_info['default_email'],
             password=user_info['login']
         )

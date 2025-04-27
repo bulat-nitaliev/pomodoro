@@ -1,27 +1,57 @@
-from sqlalchemy.orm import Session
-from service import UserService, AuthService
-from repositories import UserRepository
+
+from service import UserService, AuthService,TaskService
+from repositories import UserRepository, TasksRepository, TaskCache
 from fastapi import Depends, Request, security,Security, HTTPException, status
-from core import get_db_session, Settings
+from core import  Settings, helper
 from exception import TokenException
 from exception import TokenException
 from client import GoogleClient, YandexClient
+import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
+from cache import get_connect
 
 
-def get_user_repository(
-        db_session:Session = Depends(get_db_session)
+async def get_task_repository():
+    # db_session:AsyncSession = Depends(helper.session_factory)
+    return TasksRepository(db_session=helper.session_factory())
+
+
+def get_task_cache_repository()->TaskCache:
+    redis_connect = get_connect()
+    return TaskCache(redis_connect)
+
+def get_task_servise(
+        task_repo:TasksRepository = Depends(get_task_repository),
+        task_cache: TaskCache = Depends(get_task_cache_repository)
+)->TaskService:
+    return TaskService(
+        task_repo=task_repo,
+        task_cache=task_cache
+    )
+
+async def get_user_repository(
+        # db_session:AsyncSession = Depends(helper.session_dependency)
         )->UserRepository:
-    return UserRepository(db_session=db_session)
+    return UserRepository(db_session=helper.session_factory())
+
+async def get_async_client()->httpx.AsyncClient:
+    return httpx.AsyncClient()
 
 
-def get_google_client()->GoogleClient:
-    return GoogleClient(Settings())
+async def get_google_client(async_client:httpx.AsyncClient = Depends(get_async_client))->GoogleClient:
+    return GoogleClient(
+        settings=Settings(),
+        async_client=async_client
+        )
 
-def get_yandex_client()->YandexClient:
-    return YandexClient(Settings())
+async def get_yandex_client(async_client:httpx.AsyncClient = Depends(get_async_client))->YandexClient:
+    return YandexClient(
+        settings=Settings(),
+        async_client=async_client
+    )
 
 
-def get_auth_service(
+async def get_auth_service(
         user_repository:UserRepository = Depends(get_user_repository),
         google_client: GoogleClient = Depends(get_google_client),
         yandex_client: YandexClient = Depends(get_yandex_client)
@@ -33,7 +63,7 @@ def get_auth_service(
         yandex_client=yandex_client
         )
 
-def get_user_service(
+async def get_user_service(
         user_repository:UserRepository = Depends(get_user_repository),
         auth_service: AuthService = Depends(get_auth_service)
         )->UserService:
@@ -42,7 +72,7 @@ def get_user_service(
 
 reuseable_oauth  = security.HTTPBearer()
 
-def get_request_user_id(request:Request,
+async def get_request_user_id(request:Request,
     token:security.http.HTTPAuthorizationCredentials = Security(reuseable_oauth),
     auth_service:AuthService = Depends(get_auth_service)
 ):

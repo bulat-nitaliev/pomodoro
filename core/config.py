@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
-    DB_DRIVER:str = 'postgresql+psycopg2'
+    DB_DRIVER:str = 'postgresql+asyncpg'
     DB_HOST:str = ''
     DB_PORT:str = ''
     DB_USER:str = ''
