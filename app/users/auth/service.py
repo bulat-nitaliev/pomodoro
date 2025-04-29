@@ -5,7 +5,7 @@ from app.exception import UserNotFoundException, UserNotCorrectPasswordException
 from app.users.user_profile.models import UserProfile
 from app.config import Settings
 from jose import jwt, JWTError
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from app.users.auth.client import GoogleClient, YandexClient
 
 
@@ -84,7 +84,7 @@ class AuthService:
 
    
     def create_access_token(self, user_id:int):
-        dt_expire = (datetime.utcnow() + timedelta(days=7)).timestamp()
+        dt_expire = (datetime.now(tz=UTC) + timedelta(days=7)).timestamp()
         token = jwt.encode(
             {'user_id': user_id, 'exp':dt_expire}, 
             self.settings.JWT_SECRET, 
