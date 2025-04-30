@@ -31,9 +31,9 @@ class AuthService:
 
     async def auth_google(self,code:str)->UserLoginSchema:
         user_info = await  self.google_client.get_user_info(code=code)
-        print(user_info)
+        
         user = await self.user_repository.get_user_by_username(username=user_info['email'])
-        print(user)
+        
         if user:
             access_token = self.create_access_token(user_id=user.id)
             return UserLoginSchema(
@@ -53,9 +53,9 @@ class AuthService:
 
     async def auth_yandex(self, code:str)->UserLoginSchema:
         user_info = await self.yandex_client.get_user_info(code=code)
-        print(user_info)
+        
         user = await self.user_repository.get_user_by_username(username=user_info['default_email'])
-        print(user)
+       
         if user:
             access_token = self.create_access_token(user_id=user.id)
             return UserLoginSchema(
