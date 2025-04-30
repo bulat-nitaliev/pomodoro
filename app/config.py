@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     DB_USER:str = ''
     DB_PASS:str = ''
     DB_NAME:str = ""
+    TEST_DB_NAME:str
     CACHE_HOST:str = 'localhost'
     CACHE_PORT:int = 6379
     CACHE_DB:int = 0
@@ -31,6 +32,10 @@ class Settings(BaseSettings):
     @property
     def get_db_url(self):
         return f'{self.DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
+    
+    @property
+    def get_test_db_url(self):
+        return f'{self.DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.TEST_DB_NAME}'
     
     @property
     def get_url_redirect(self):

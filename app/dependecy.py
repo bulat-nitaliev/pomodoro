@@ -6,10 +6,14 @@ from app.infrastructure import   helper, get_connect
 from app.config import Settings
 from app.exception import TokenException
 import httpx
+from sqlalchemy.ext.asyncio import AsyncSession
 
+async def get_db_session():
+    async with helper.session_factory() as session:
+        yield session
 
-async def get_task_repository():
-    return TasksRepository(db_session=helper.session_factory())
+async def get_task_repository(db_session: AsyncSession = Depends(get_db_session)):
+    return TasksRepository(db_session=db_session)
 
 
 def get_task_cache_repository()->TaskCache:
@@ -25,9 +29,8 @@ def get_task_servise(
         task_cache=task_cache
     )
 
-async def get_user_repository(
-        )->UserRepository:
-    return UserRepository(db_session=helper.session_factory())
+async def get_user_repository(db_session: AsyncSession = Depends(get_db_session))->UserRepository:
+    return UserRepository(db_session=db_session)
 
 async def get_async_client()->httpx.AsyncClient:
     return httpx.AsyncClient()

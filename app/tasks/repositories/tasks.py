@@ -9,6 +9,7 @@ class TasksRepository:
     def __init__(self, db_session:AsyncSession):
         self.db_session = db_session
 
+
     async def get_task(self,task_id:int):
         async with self.db_session as session:
             return await session.get(Tasks, task_id)
@@ -19,7 +20,7 @@ class TasksRepository:
         async with self.db_session as session:
             res:Result  = await session.execute(query)
             res = res.scalars().all()
-            print(res)
+            
             return list(res)
 
 
@@ -33,6 +34,7 @@ class TasksRepository:
             await session.commit()         
             await task_cache.drop_tasks()
             return task_id.scalar()
+        
         
     async def update_task(
             self,
@@ -51,6 +53,7 @@ class TasksRepository:
             await session.commit()
             await task_cache.drop_tasks()
             return await self.get_task(id.scalar_one_or_none())
+        
         
     async def delete_task(self,task_id:int,  task_cache: TaskCache):
         query = delete(Tasks).where(Tasks.id == task_id)

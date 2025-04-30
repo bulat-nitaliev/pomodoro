@@ -3,7 +3,6 @@ from app.users.auth.schema import UserLoginSchema
 from app.config import Settings
 from jose import jwt
 from datetime import datetime,UTC, timedelta
-from app.users.user_profile.models import UserProfile
 
 
 

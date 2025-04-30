@@ -5,7 +5,7 @@ import httpx
 import pytest
 from app.users.auth.schema import GoogleSchema, YandexSchema
 from faker import Factory as FakerFactory
-import factory
+
 
 faker = FakerFactory.create()
  
