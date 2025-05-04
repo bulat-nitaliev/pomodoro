@@ -12,7 +12,9 @@ class FakeUserRepository:
     db_session:AsyncSession
 
     async def get_user_by_username(self,username:str):
-        ...
+        query = select(UserProfile).where(UserProfile.username == username)
+        async with self.db_session as session:
+            return  (await session.execute(query)).scalar_one_or_none()
 
     async def create_user(self,username:str,
             password:str

@@ -6,12 +6,24 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.config import Settings
 from app.config import  settings as config
 from app.infrastructure.db.database import Base
+from redis import asyncio as redis
+from app.config import settings
+
+
 
 
 @pytest.fixture
 def settings():
     return Settings()
 
+
+@pytest_asyncio.fixture(scope="function")
+def test_cache_get_connect()->redis.Redis:
+    return redis.Redis(
+        host=config.TEST_CACHE_HOST,
+        port=config.TEST_CACHE_PORT,
+        db=config.TEST_CACHE_DB,
+    )
 
 engine = create_async_engine(url=config.get_test_db_url, future=True, echo=False, pool_pre_ping=True)
 

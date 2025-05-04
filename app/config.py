@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     CACHE_HOST:str = 'localhost'
     CACHE_PORT:int = 6379
     CACHE_DB:int = 0
+    TEST_CACHE_HOST:str = 'localhost'
+    TEST_CACHE_PORT:int = 6379
+    TEST_CACHE_DB:int = 1
 
     JWT_SECRET:str = ''
     JWT_ALGORITM:str = ''

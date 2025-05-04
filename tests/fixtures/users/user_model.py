@@ -4,8 +4,8 @@ import factory
 from app.users.user_profile.models import UserProfile
 
 
-EXISTS_GOOGLE_USER_ID = 20
-EXISTS_GOOGLE_USER_EMAIL = "bulat@mail.ru"
+EXISTS_GOOGLE_USER = "bulat@mail.ru"
+EXISTS_GOOGLE_PASSWORD = "bulat"
 
 
 faker = FakerFactory.create()
