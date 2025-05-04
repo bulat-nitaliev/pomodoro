@@ -12,6 +12,7 @@ class TaskService:
     async def get_tasks(self):
 
         if task_cache_repo:= await self.task_cache.get_tasks():
+            print(task_cache_repo, 'cache_______')
             return task_cache_repo
         
         tasks = await self.task_repo.get_tasks()
@@ -33,6 +34,7 @@ class TaskService:
             user_id=user_id
             )
         
+        
         task = await self.task_repo.get_task(task_id=task_id)
         return TasksSchema.model_validate(task)
     
@@ -51,6 +53,7 @@ class TaskService:
             task_cache=self.task_cache,
             user_id=user_id
             )
+       
         return TasksSchema.model_validate(task_update)
     
     

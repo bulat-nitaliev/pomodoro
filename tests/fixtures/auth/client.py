@@ -5,7 +5,8 @@ import httpx
 import pytest
 from app.users.auth.schema import GoogleSchema, YandexSchema
 from faker import Factory as FakerFactory
-import factory
+from tests.fixtures.users.user_model import EXISTS_GOOGLE_USER, EXISTS_GOOGLE_PASSWORD
+
 
 faker = FakerFactory.create()
  
@@ -18,8 +19,8 @@ class FakeGoogleClient:
     async def get_user_info(self, code:str): 
         async with self.async_client as client:
             return GoogleSchema(
-                email=faker.name(),
-                name = faker.name()
+                email=EXISTS_GOOGLE_USER,
+                name = EXISTS_GOOGLE_PASSWORD
             ).model_dump()
         
     

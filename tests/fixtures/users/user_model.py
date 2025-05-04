@@ -4,6 +4,10 @@ import factory
 from app.users.user_profile.models import UserProfile
 
 
+EXISTS_GOOGLE_USER = "bulat@mail.ru"
+EXISTS_GOOGLE_PASSWORD = "bulat"
+
+
 faker = FakerFactory.create()
 
 @register(name='user_profile')

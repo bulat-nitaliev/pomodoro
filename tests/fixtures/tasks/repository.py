@@ -1,14 +1,21 @@
+from tests.fixtures.users.user_model import FakeUserProfile
+from tests.fixtures.tasks.tasks_model import FakeCategory, FakeTasks
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import insert, select
+from app.users.user_profile.models import UserProfile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Result, delete, update, insert
 from app.tasks.models import  Tasks
 from app.tasks.schema import  TasksCreateSchema
-from .task_cache import TaskCache
+from app.tasks import TaskCache
+
+from dataclasses import dataclass
 
 
-class TasksRepository:
-    def __init__(self, db_session:AsyncSession):
-        self.db_session = db_session
-
+@dataclass
+class FakeTaskRepository:
+    db_session:AsyncSession
 
     async def get_task(self,task_id:int):
         async with self.db_session as session:
@@ -68,5 +75,9 @@ class TasksRepository:
         async with self.db_session as session:
             task = await session.execute(query)
             return task.one_or_none()
-        
+
+@pytest.fixture
+def task_repository(get_db_session):
+    return FakeTaskRepository(db_session=get_db_session)
+
 
