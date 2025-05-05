@@ -36,11 +36,12 @@ AsyncSessionFactory = async_sessionmaker(
 
 
 @pytest_asyncio.fixture(autouse=True, scope="function")
-async def init_models(event_loop):
+async def init_models(task_cache):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with engine.begin() as conn:
+        await task_cache.drop_tasks()
         await conn.run_sync(Base.metadata.drop_all)
 
 
