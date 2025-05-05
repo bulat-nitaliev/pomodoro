@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL:str = 'redis://localhost:6379/0'
     CELERY_RESULT_BACKEND:str = 'redis://localhost:6379/0'
 
+    BROKER_URL:str 
+
     @property
     def get_db_url(self):
         return f'{self.DB_DRIVER}://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
@@ -63,6 +65,6 @@ class Settings(BaseSettings):
     def get_yandex_url_redirect(self):
         return f'''https://oauth.yandex.ru/authorize?response_type=code&client_id={self.Y_CLIENT_ID}&redirect_uri={self.Y_REDIRECT_URI}'''
     
-
+    
 
 settings = Settings()
