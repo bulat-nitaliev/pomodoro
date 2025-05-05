@@ -1,5 +1,5 @@
 
-from app.users import  UserService, AuthService, UserRepository, GoogleClient, YandexClient
+from app.users import  UserService, AuthService, UserRepository, GoogleClient, YandexClient, MailClient
 from app.tasks import TaskService, TasksRepository, TaskCache
 from fastapi import Depends, Request, security,Security, HTTPException, status
 from app.infrastructure import   helper, get_connect
@@ -58,7 +58,8 @@ async def get_auth_service(
         user_repository=user_repository, 
         settings=Settings(),
         google_client=google_client,
-        yandex_client=yandex_client
+        yandex_client=yandex_client,
+        mail_client=MailClient(settings=Settings())
         )
 
 async def get_user_service(

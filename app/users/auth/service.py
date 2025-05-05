@@ -6,7 +6,7 @@ from app.users.user_profile.models import UserProfile
 from app.config import Settings
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, UTC
-from app.users.auth.client import GoogleClient, YandexClient
+from app.users.auth.client import GoogleClient, YandexClient, MailClient
 
 
 
@@ -16,6 +16,7 @@ class AuthService:
     settings: Settings
     google_client: GoogleClient
     yandex_client: YandexClient
+    mail_client:MailClient
 
     async def login(self,username:str, password:str)->UserLoginSchema:
         user = await self.user_repository.get_user_by_username(username)
@@ -46,6 +47,12 @@ class AuthService:
             password=user_info['name']
         )
         access_token = self.create_access_token(user_id=user_created.id)
+        self.mail_client.send_welcome_message(
+            subject=self.settings.EMAIL_SUBJECT, 
+            text=self.settings.EMAIL_TEXT, 
+            to=user_info['email']
+            )
+        
         return UserLoginSchema(
             user_id=user_created.id, 
             access_token=access_token
@@ -68,6 +75,11 @@ class AuthService:
             password=user_info['login']
         )
         access_token = self.create_access_token(user_id=user_created.id)
+        self.mail_client.send_welcome_message(
+            subject=self.settings.EMAIL_SUBJECT, 
+            text=self.settings.EMAIL_TEXT, 
+            to=user_info['default_email']
+            )
         return UserLoginSchema(
             user_id=user_created.id, 
             access_token=access_token

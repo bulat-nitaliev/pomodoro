@@ -4,7 +4,8 @@ import factory
 from app.users.user_profile.models import UserProfile
 
 
-EXISTS_GOOGLE_USER = "bulat@mail.ru"
+EXISTS_GOOGLE_USER = "nibulat924@gmail.com"
+# EXISTS_GOOGLE_USER = "bulatnitaliev@yandex.ru"
 EXISTS_GOOGLE_PASSWORD = "bulat"
 
 

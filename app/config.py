@@ -31,6 +31,20 @@ class Settings(BaseSettings):
     Y_SECRET_KEY: str
     Y_REDIRECT_URI: str
     Y_TOKEN_URL:str
+    EMAIL_BACKEND:str
+    EMAIL_HOST:str
+    EMAIL_PORT:int = 465
+    EMAIL_USE_SSL:bool = True
+
+    EMAIL_HOST_USER:str 
+    EMAIL_HOST_PASSWORD:str
+
+    
+    EMAIL_SUBJECT:str = 'Welcome message'
+    EMAIL_TEXT:str = 'Allhamdulillah'
+
+    CELERY_BROKER_URL:str = 'redis://localhost:6379/0'
+    CELERY_RESULT_BACKEND:str = 'redis://localhost:6379/0'
 
     @property
     def get_db_url(self):
