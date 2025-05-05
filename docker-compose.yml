@@ -12,7 +12,22 @@ services:
     #     volumes:
     #         - .data_db:/var/lib/postgresql/
 
-    cache:
-        image: redis:7.2.4-alpine
-        restart: always
-        ports: [6377:6379]
+    # cache:
+    #     image: redis:7.2.4-alpine
+    #     restart: always
+    #     ports: [6377:6379]
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        hostname: rabbitmq
+        container_name: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            RABBITMQ_DEFAULT_USER: "guest"
+            RABBITMQ_DEFAULT_PASS: "guest"
+        volumes:
+        - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq-data:
