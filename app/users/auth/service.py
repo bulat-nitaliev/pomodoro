@@ -47,7 +47,7 @@ class AuthService:
             password=user_info['name']
         )
         access_token = self.create_access_token(user_id=user_created.id)
-        self.mail_client.send_welcome_message(
+        await self.mail_client.send_welcome_message(
             subject=self.settings.EMAIL_SUBJECT, 
             text=self.settings.EMAIL_TEXT, 
             to=user_info['email']
@@ -75,7 +75,7 @@ class AuthService:
             password=user_info['login']
         )
         access_token = self.create_access_token(user_id=user_created.id)
-        self.mail_client.send_welcome_message(
+        await self.mail_client.send_welcome_message(
             subject=self.settings.EMAIL_SUBJECT, 
             text=self.settings.EMAIL_TEXT, 
             to=user_info['default_email']
