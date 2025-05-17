@@ -4,11 +4,13 @@ from app.config import Settings
 import aio_pika
 import json
 import uuid
+from app.broker import BrokerProducer
 
 
 @dataclass
 class MailClient:
     settings: Settings
+    broker_producer: BrokerProducer
 
     async def send_welcome_message(
             self, 
@@ -16,28 +18,15 @@ class MailClient:
             text:str, 
             to:str
             ):
-        
-        connection = await aio_pika.connect_robust(self.settings.BROKER_URL)
-        print(connection, self.settings.BROKER_URL)
-        async with connection:
-            channel = await connection.channel()
-            data = {
+        data = {
                 "message": text,
                 "user_email": to,
                 "subject": subject
             }
-            message  = aio_pika.Message(
-                body=json.dumps(data).encode(),
-                correlation_id=str(uuid.uuid4())
-            )
-            name ='email_queue'
-            await channel.declare_queue(name,durable=True)
-
-            await channel.default_exchange.publish(
-                message=message,
-                routing_key=name
-            )
-            return
+        
+        await self.broker_producer.send_welkome_email(email_data=data)
+        
+        
             
                 
             

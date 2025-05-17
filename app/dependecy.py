@@ -1,4 +1,6 @@
-
+import asyncio
+from app.broker import BrokerProducer, BrokerConsumer
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from app.users import  UserService, AuthService, UserRepository, GoogleClient, YandexClient, MailClient
 from app.tasks import TaskService, TasksRepository, TaskCache
 from fastapi import Depends, Request, security,Security, HTTPException, status
@@ -7,6 +9,37 @@ from app.config import Settings
 from app.exception import TokenException
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+event_loop = asyncio.get_event_loop()
+
+
+async def get_broker_producer() -> BrokerProducer:
+    settings = Settings()
+    return BrokerProducer(
+        producer=AIOKafkaProducer(
+            bootstrap_servers=settings.BROKER_URL,
+            loop=event_loop
+        ),
+        email_topic=settings.EMAIL_TOPIC
+    )
+
+
+async def get_broker_consumer() -> BrokerConsumer:
+    settings = Settings()
+    return BrokerConsumer(
+        consumer=AIOKafkaConsumer(
+    settings.EMAIL_CALLBACK_TOPIC,
+            bootstrap_servers='localhost:9092',
+            value_deserializer=lambda message: json.loads(message.decode('utf-8'))
+        ),
+    )
+
+
+async def get_mail_client(
+    broker_producer: BrokerProducer = Depends(get_broker_producer),
+) -> MailClient:
+    return MailClient(settings=Settings(), broker_producer=broker_producer)
 
 async def get_db_session():
     async with helper.session_factory() as session:
