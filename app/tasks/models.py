@@ -6,10 +6,9 @@ from app.infrastructure import Base
 
 class Tasks(Base):
     name: Mapped[Optional[str]] = mapped_column(String(300))
-    pomodoro_count: Mapped[int] 
+    pomodoro_count: Mapped[int]
     category_id: Mapped[int]
-    user_id: Mapped[int] = mapped_column(ForeignKey('userprofile.id'))
-
+    user_id: Mapped[int] = mapped_column(ForeignKey("userprofile.id"))
 
 
 class Category(Base):

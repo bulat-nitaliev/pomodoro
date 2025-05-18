@@ -1,2 +1,2 @@
 class TaskNotFoundException(Exception):
-    detail = 'task not found'
+    detail = "task not found"

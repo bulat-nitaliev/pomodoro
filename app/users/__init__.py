@@ -4,9 +4,6 @@ from app.users.auth.service import AuthService
 from app.users.auth.client import GoogleClient, YandexClient, MailClient
 
 
-
-
-
 __all__ = (
     "UserService",
     "UserRepository",

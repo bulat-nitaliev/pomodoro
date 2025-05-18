@@ -7,7 +7,7 @@ from app.tasks.models import Tasks, Category
 faker = FakerFactory.create()
 
 
-@register(name='tasks')
+@register(name="tasks")
 class FakeTasks(factory.Factory):
     class Meta:
         model = Tasks
@@ -19,7 +19,7 @@ class FakeTasks(factory.Factory):
     user_id = factory.LazyFunction(lambda: faker.random_int())
 
 
-@register(name='category')
+@register(name="category")
 class FakeCategory(factory.Factory):
     class Meta:
         model = Category

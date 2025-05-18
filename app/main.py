@@ -4,8 +4,6 @@ from app.tasks.handler import router as task_router
 from app.users.user_profile.handler import router as user
 from app.users.auth.handlers import router as auth
 from app.dependecy import get_broker_consumer
-import asyncio
-
 
 
 @asynccontextmanager
@@ -15,12 +13,11 @@ async def lifespan(app: FastAPI):
     await broker_consumer.consume_callback_message()
     yield
 
+
 app = FastAPI(lifespan=lifespan)
 app.include_router(user)
 app.include_router(auth)
 app.include_router(task_router)
-
-
 
 
 # async def send_mail(email:str, message:str):
@@ -32,7 +29,3 @@ app.include_router(task_router)
 # async def send_mail_async(background:BackgroundTasks, email:str, message:str):
 #     background.add_task(send_mail, email=email, message=message)
 #     return {"message": "Email will be sent in the background"}
-
-
-
-

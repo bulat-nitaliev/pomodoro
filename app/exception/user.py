@@ -1,8 +1,6 @@
-
-
 class UserNotFoundException(Exception):
-    detail = 'User not found'
+    detail = "User not found"
 
 
 class UserNotCorrectPasswordException(Exception):
-    detail = 'User not correct password'
+    detail = "User not correct password"

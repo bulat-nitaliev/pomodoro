@@ -1,13 +1,16 @@
 from dataclasses import dataclass
 from app.users.auth.schema import UserLoginSchema
 from app.users.user_profile.repositories import UserRepository
-from app.exception import UserNotFoundException, UserNotCorrectPasswordException, TokenException
+from app.exception import (
+    UserNotFoundException,
+    UserNotCorrectPasswordException,
+    TokenException,
+)
 from app.users.user_profile.models import UserProfile
 from app.config import Settings
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, UTC
 from app.users.auth.client import GoogleClient, YandexClient, MailClient
-
 
 
 @dataclass
@@ -16,101 +19,86 @@ class AuthService:
     settings: Settings
     google_client: GoogleClient
     yandex_client: YandexClient
-    mail_client:MailClient
+    mail_client: MailClient
 
-    async def login(self,username:str, password:str)->UserLoginSchema:
+    async def login(self, username: str, password: str) -> UserLoginSchema:
         user = await self.user_repository.get_user_by_username(username)
         self.validate(user=user, password=password)
         access_token = self.create_access_token(user_id=user.id)
         return UserLoginSchema(user_id=user.id, access_token=access_token)
-    
-    async def get_google_redirect_url(self)->str:
-        return self.settings.get_url_redirect
-    
 
-    async def get_yandex_redirect_url(self)->str:
+    async def get_google_redirect_url(self) -> str:
+        return self.settings.get_url_redirect
+
+    async def get_yandex_redirect_url(self) -> str:
         return self.settings.get_yandex_url_redirect
 
-    async def auth_google(self,code:str)->UserLoginSchema:
-        user_info = await  self.google_client.get_user_info(code=code)
-        
-        user = await self.user_repository.get_user_by_username(username=user_info['email'])
-        
+    async def auth_google(self, code: str) -> UserLoginSchema:
+        user_info = await self.google_client.get_user_info(code=code)
+
+        user = await self.user_repository.get_user_by_username(
+            username=user_info["email"]
+        )
+
         if user:
             access_token = self.create_access_token(user_id=user.id)
-            return UserLoginSchema(
-                user_id=user.id, 
-                access_token=access_token
-                )
+            return UserLoginSchema(user_id=user.id, access_token=access_token)
         user_created = await self.user_repository.create_user(
-            username=user_info['email'],
-            password=user_info['name']
+            username=user_info["email"], password=user_info["name"]
         )
         access_token = self.create_access_token(user_id=user_created.id)
         await self.mail_client.send_welcome_message(
-            subject=self.settings.EMAIL_SUBJECT, 
-            text=self.settings.EMAIL_TEXT, 
-            to=user_info['email']
-            )
-        
-        return UserLoginSchema(
-            user_id=user_created.id, 
-            access_token=access_token
-            )
+            subject=self.settings.EMAIL_SUBJECT,
+            text=self.settings.EMAIL_TEXT,
+            to=user_info["email"],
+        )
 
+        return UserLoginSchema(user_id=user_created.id, access_token=access_token)
 
-    async def auth_yandex(self, code:str)->UserLoginSchema:
+    async def auth_yandex(self, code: str) -> UserLoginSchema:
         user_info = await self.yandex_client.get_user_info(code=code)
-        
-        user = await self.user_repository.get_user_by_username(username=user_info['default_email'])
-       
+
+        user = await self.user_repository.get_user_by_username(
+            username=user_info["default_email"]
+        )
+
         if user:
             access_token = self.create_access_token(user_id=user.id)
-            return UserLoginSchema(
-                user_id=user.id, 
-                access_token=access_token
-                )
+            return UserLoginSchema(user_id=user.id, access_token=access_token)
         user_created = await self.user_repository.create_user(
-            username=user_info['default_email'],
-            password=user_info['login']
+            username=user_info["default_email"], password=user_info["login"]
         )
         access_token = self.create_access_token(user_id=user_created.id)
         await self.mail_client.send_welcome_message(
-            subject=self.settings.EMAIL_SUBJECT, 
-            text=self.settings.EMAIL_TEXT, 
-            to=user_info['default_email']
-            )
-        return UserLoginSchema(
-            user_id=user_created.id, 
-            access_token=access_token
-            )
-
-
-    
+            subject=self.settings.EMAIL_SUBJECT,
+            text=self.settings.EMAIL_TEXT,
+            to=user_info["default_email"],
+        )
+        return UserLoginSchema(user_id=user_created.id, access_token=access_token)
 
     @staticmethod
-    def validate(user:UserProfile, password:str):
+    def validate(user: UserProfile, password: str):
         if not user:
             raise UserNotFoundException
         if user.password != password:
             raise UserNotCorrectPasswordException
 
-   
-    def create_access_token(self, user_id:int):
+    def create_access_token(self, user_id: int):
         dt_expire = (datetime.now(tz=UTC) + timedelta(days=7)).timestamp()
         token = jwt.encode(
-            {'user_id': user_id, 'exp':dt_expire}, 
-            self.settings.JWT_SECRET, 
-            algorithm=self.settings.JWT_ALGORITM
-            )
+            {"user_id": user_id, "exp": dt_expire},
+            self.settings.JWT_SECRET,
+            algorithm=self.settings.JWT_ALGORITM,
+        )
         return token
-    
+
     def get_user_id_from_access_token(self, access_token):
         try:
             payload = jwt.decode(
-                token=access_token, 
-                key=self.settings.JWT_SECRET, 
-                algorithms=[self.settings.JWT_ALGORITM])
+                token=access_token,
+                key=self.settings.JWT_SECRET,
+                algorithms=[self.settings.JWT_ALGORITM],
+            )
         except JWTError:
             raise TokenException
-        return payload['user_id']
+        return payload["user_id"]
