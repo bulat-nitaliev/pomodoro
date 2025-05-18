@@ -21,7 +21,8 @@ class MailClient:
         data = {
                 "message": text,
                 "user_email": to,
-                "subject": subject
+                "subject": subject,
+                "correllation_id": str(uuid.uuid4())
             }
         
         await self.broker_producer.send_welkome_email(email_data=data)

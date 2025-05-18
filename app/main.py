@@ -7,17 +7,21 @@ from app.dependecy import get_broker_consumer
 import asyncio
 
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    broker_consumer = await get_broker_consumer()
+    print(broker_consumer, 1)
+    await broker_consumer.consume_callback_message()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(user)
 app.include_router(auth)
 app.include_router(task_router)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    broker_consumer = await get_broker_consumer()
-    await broker_consumer.consume_callback_message()
-    yield
+
 
 # async def send_mail(email:str, message:str):
 #     await asyncio.sleep(5)

@@ -14,7 +14,9 @@ class BrokerConsumer:
         await self.consumer.stop()
 
     async def consume_callback_message(self)->None:
+        print("consumer")
         await self.start_connection()
+        
         try:
             async for message in  self.consumer:
                 print(message.value)
