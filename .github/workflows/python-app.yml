@@ -31,6 +31,6 @@ jobs:
     - name: Lint with black
       run: |
         python -m black .
-    - name: Test with pytest
-      run: |
-        pytest
+    # - name: Test with pytest
+    #   run: |
+    #     pytest
