@@ -6,5 +6,5 @@ __all__ = (
     "UserNotFoundException",
     "UserNotCorrectPasswordException",
     "TokenException",
-    "TaskNotFoundException"
+    "TaskNotFoundException",
 )

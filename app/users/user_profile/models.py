@@ -1,4 +1,3 @@
-from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String
 from app.infrastructure import Base

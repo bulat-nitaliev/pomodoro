@@ -3,7 +3,6 @@ import asyncio
 import pytest
 
 
-
 pytest_plugins = [
     "tests.fixtures.auth.auth_service",
     "tests.fixtures.users.service",
@@ -16,7 +15,6 @@ pytest_plugins = [
     "tests.fixtures.users.user_model",
     "tests.fixtures.infrastructure",
 ]
-
 
 
 @pytest.fixture(scope="session")

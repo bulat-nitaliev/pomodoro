@@ -1,5 +1,5 @@
-from .tasks import  TasksRepository
-from .task_cache import  TaskCache
+from .tasks import TasksRepository
+from .task_cache import TaskCache
 
 
 __all__ = (

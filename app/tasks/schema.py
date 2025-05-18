@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class TasksSchema(BaseModel):
     name: Optional[str]
-    pomodoro_count: int 
+    pomodoro_count: int
     category_id: int
-    user_id:int
+    user_id: int
 
     class Config:
         from_attributes = True
@@ -13,9 +14,8 @@ class TasksSchema(BaseModel):
 
 class TasksSchemaPartial(BaseModel):
     name: Optional[str]
-    pomodoro_count: Optional[int] 
+    pomodoro_count: Optional[int]
     category_id: Optional[int]
-
 
 
 class Category(BaseModel):
@@ -25,5 +25,5 @@ class Category(BaseModel):
 
 class TasksCreateSchema(BaseModel):
     name: Optional[str]
-    pomodoro_count: int 
+    pomodoro_count: int
     category_id: int

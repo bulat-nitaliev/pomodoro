@@ -11,7 +11,8 @@ EXISTS_GOOGLE_PASSWORD = "bulat"
 
 faker = FakerFactory.create()
 
-@register(name='user_profile')
+
+@register(name="user_profile")
 class FakeUserProfile(factory.Factory):
     class Meta:
         model = UserProfile

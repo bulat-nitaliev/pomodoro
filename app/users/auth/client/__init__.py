@@ -3,8 +3,4 @@ from .yandex import YandexClient
 from .mail import MailClient
 
 
-__all__ = (
-    "GoogleClient",
-    "YandexClient",
-    "MailClient"
-)
+__all__ = ("GoogleClient", "YandexClient", "MailClient")

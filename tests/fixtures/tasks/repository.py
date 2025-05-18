@@ -1,13 +1,9 @@
-from tests.fixtures.users.user_model import FakeUserProfile
-from tests.fixtures.tasks.tasks_model import FakeCategory, FakeTasks
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert, select
-from app.users.user_profile.models import UserProfile
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, Result, delete, update, insert
-from app.tasks.models import  Tasks
-from app.tasks.schema import  TasksCreateSchema
+from sqlalchemy import Result, delete, update
+from app.tasks.models import Tasks
+from app.tasks.schema import TasksCreateSchema
 from app.tasks import TaskCache
 
 from dataclasses import dataclass
@@ -15,69 +11,65 @@ from dataclasses import dataclass
 
 @dataclass
 class FakeTaskRepository:
-    db_session:AsyncSession
+    db_session: AsyncSession
 
-    async def get_task(self,task_id:int):
+    async def get_task(self, task_id: int):
         async with self.db_session as session:
             return await session.get(Tasks, task_id)
-        
-        
+
     async def get_tasks(self):
         query = select(Tasks).order_by(Tasks.id.desc())
         async with self.db_session as session:
-            res:Result  = await session.execute(query)
+            res: Result = await session.execute(query)
             res = res.scalars().all()
-            
+
             return list(res)
 
+    async def add_task(
+        self, task: TasksCreateSchema, task_cache: TaskCache, user_id: int
+    ):
 
-    async def add_task(self, task:TasksCreateSchema, task_cache: TaskCache, user_id:int):
-        
-        query = insert(Tasks).values(
-            **task.model_dump(), user_id=user_id
-        ).returning(Tasks.id)
-        async with self.db_session as session:          
-            task_id:int = await session.execute(query)           
-            await session.commit()         
+        query = (
+            insert(Tasks)
+            .values(**task.model_dump(), user_id=user_id)
+            .returning(Tasks.id)
+        )
+        async with self.db_session as session:
+            task_id: int = await session.execute(query)
+            await session.commit()
             await task_cache.drop_tasks()
             return task_id.scalar()
-        
-        
+
     async def update_task(
-            self,
-            task_id:int, 
-            task:TasksCreateSchema,  
-            task_cache: TaskCache,
-            user_id:int
-            ):
-       
-        query = update(Tasks).where(Tasks.id == task_id).values(
-            **task.model_dump(),
-            user_id=user_id
-            ).returning(Tasks.id)
+        self, task_id: int, task: TasksCreateSchema, task_cache: TaskCache, user_id: int
+    ):
+
+        query = (
+            update(Tasks)
+            .where(Tasks.id == task_id)
+            .values(**task.model_dump(), user_id=user_id)
+            .returning(Tasks.id)
+        )
         async with self.db_session as session:
-            id:int  = await  session.execute(query)
+            id: int = await session.execute(query)
             await session.commit()
             await task_cache.drop_tasks()
             return await self.get_task(id.scalar_one_or_none())
-        
-        
-    async def delete_task(self,task_id:int,  task_cache: TaskCache):
+
+    async def delete_task(self, task_id: int, task_cache: TaskCache):
         query = delete(Tasks).where(Tasks.id == task_id)
         async with self.db_session as session:
             await session.execute(query)
             await session.commit()
             await task_cache.drop_tasks()
-            
-    
-    async def get_user_task(self,task_id:int, user_id:int):
-        query = select(Tasks).where(Tasks.id==task_id, Tasks.user_id==user_id)
+
+    async def get_user_task(self, task_id: int, user_id: int):
+        query = select(Tasks).where(Tasks.id == task_id, Tasks.user_id == user_id)
         async with self.db_session as session:
             task = await session.execute(query)
             return task.one_or_none()
 
+
 @pytest.fixture
 def task_repository(get_db_session):
     return FakeTaskRepository(db_session=get_db_session)
-
-
